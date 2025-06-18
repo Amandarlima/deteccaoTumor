@@ -2,22 +2,19 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import datetime
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.utils import to_categorical
 from keras.optimizers import Adam
-from keras.callbacks import TensorBoard
-
 
 # Caminhos das pastas
 train_dir = 'dataset/Training'
 test_dir = 'dataset/Testing'
 
 IMG_SIZE = 300
-orb = cv2.ORB_create()
+orb = cv2.ORB_create()  
 
 # Pré-processamento e extração de características com ORB
 def processar_imagens(diretorio):
@@ -79,10 +76,6 @@ y_test_enc = encoder.transform(y_test)
 y_train_cat = to_categorical(y_train_enc)
 y_test_cat = to_categorical(y_test_enc)
 
-# Callback TensorBoard
-log_dir = "logs/treinamento_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-
 # Modelo Keras
 modelo = Sequential()
 modelo.add(Dense(64, activation='relu', input_shape=(X_train.shape[1],)))
@@ -90,16 +83,7 @@ modelo.add(Dense(32, activation='relu'))
 modelo.add(Dense(4, activation='softmax'))
 
 modelo.compile(optimizer=Adam(0.001), loss='categorical_crossentropy', metrics=['accuracy'])
-
-# Treinamento com callback do TensorBoard
-history = modelo.fit(
-    X_train,
-    y_train_cat,
-    epochs=20,
-    batch_size=8,
-    validation_split=0.2,
-    callbacks=[tensorboard_callback]
-)
+history = modelo.fit(X_train, y_train_cat, epochs=20, batch_size=8, validation_split=0.2)
 
 # Avaliação
 loss, acc = modelo.evaluate(X_test, y_test_cat)
@@ -132,7 +116,8 @@ plt.grid(True)
 
 plt.tight_layout()
 plt.show()
+# Salvar modelo treinado
+modelo.save("modelo_tumor.keras")
 
-print("\n✅ Para visualizar o treinamento em tempo real, execute no terminal:")
-print("tensorboard --logdir=logs")
-print("Depois acesse: http://localhost:6006/")
+# Salvar classes para o encoder
+np.save("classes_labels.npy", encoder.classes_)
