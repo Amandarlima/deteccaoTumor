@@ -108,7 +108,12 @@ y_pred = modelo.predict(X_test)
 y_pred_classes = np.argmax(y_pred, axis=1)
 
 # Exibe relatório de classificação com métricas como precisão, recall e f1-score
-print(classification_report(y_test_enc, y_pred_classes, target_names=encoder.classes_))
+print(classification_report(
+    y_test_enc, 
+    y_pred_classes, 
+    target_names=encoder.classes_, 
+    labels=np.arange(len(encoder.classes_))
+))
 
 # (Opcional) Plotagem dos gráficos de treinamento - comentado pois não roda na web
 """
